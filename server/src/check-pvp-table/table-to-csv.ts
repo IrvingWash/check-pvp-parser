@@ -1,42 +1,59 @@
-import { createObjectCsvWriter } from "csv-writer";
-import { CsvWriter } from "csv-writer/src/lib/csv-writer";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
 import { TableRowDto } from "./table-row.dto";
+import { EOL } from "os";
+import { normalize } from "path";
+
+const encoding = "utf-8";
+
+const header = [
+    'Side',
+    'Name-Realm',
+    'Max Arena',
+];
 
 export class TableToCsv {
     private _savePath: string;
-    private _csvWriter: CsvWriter<TableRowDto>;
 
     public constructor() {
-        this._savePath = process.env.CSV_SAVE_PATH;
+        const path = process.env.CSV_SAVE_PATH;
 
-        this._csvWriter = createObjectCsvWriter({
-            path: this._savePath,
-            header: [
-                { id: 'side', title: 'Side' },
-                { id: 'nameRealm', title: 'Name-Realm' },
-                { id: 'maxArena', title: 'Max Arena' }
-            ],
-            append: true,
-        });
-
-        if (this._savePath === undefined) {
+        if (path === undefined) {
             throw new Error("Please specify where to save the csv in the `/server/.env` file");
         }
 
-        this._createCsvIfNeeded();
+        this._savePath = normalize(path);
     }
 
     public async parse(dto: TableRowDto[]): Promise<void> {
-        await this._csvWriter.writeRecords(dto);
-    }
+        this._createCsvIfNeeded();
 
-    private _createCsvIfNeeded() {
-        if (existsSync(this._savePath)) {
-            return;
+        // Load csv
+        const prev_csv = readFileSync(this._savePath, { encoding });
+        let rows = prev_csv.split(EOL);
+
+        // Append new rows
+        for (const new_row of dto) {
+            rows.push(Object.values(new_row).join(","));
         }
 
-        writeFileSync(this._savePath, "");
+        // Remove old rows
+        if (rows.length > 1000) {
+            rows = rows.slice(1, dto.length);
+        }
+
+        // Remove duplicates
+        rows = Array.from(new Set(rows));
+
+        // Save to file
+        writeFileSync(this._savePath, rows.join(EOL));
+    }
+
+    private _createCsvIfNeeded(): void {
+        if (existsSync(this._savePath)) {
+            return;
+        };
+
+        writeFileSync(this._savePath, header.join(","));
     }
 }
