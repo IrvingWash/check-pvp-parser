@@ -17,7 +17,7 @@ npm run start:prod
 ## Plugin
 Run in the `./plugin` directory:
 ```
-npm i
+npm i --force
 npm run build
 ```
 Then add it to chrome (google how to add a custom plugin) by selecting the `./plugin/dist` directory
