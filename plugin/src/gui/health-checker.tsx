@@ -1,20 +1,15 @@
 import { useEffect, useState } from "react"
+
+import { HealthCheckerViewModel, HealthInfo } from "./health-checker-view-model";
+
 import s from './health-checker.module.css';
 
 interface HealthCheckerProps {
-    healthChecker: () => Promise<boolean>
+    model: HealthCheckerViewModel,
 }
-
-interface MessageInfo {
-    text: string,
-    intent: string,
-}
-
-const healthy: MessageInfo = { text: "Healthy)))", intent: "healthy" };
-const sick: MessageInfo = { text: "Sick(((", intent: "sick" };
 
 export function HealthChecker(props: HealthCheckerProps): JSX.Element {
-    const [health, setHealth] = useState(sick)
+    const [health, setHealth] = useState<HealthInfo | null>(null);
 
     useEffect(() => {
         checkHealth()
@@ -22,15 +17,15 @@ export function HealthChecker(props: HealthCheckerProps): JSX.Element {
 
     return (
         <div>
-            <p className={ s[health.intent] }>{ health.text }</p>
+            { health &&
+                <p className={ s[health.intent] }>{ health.text }</p>
+            }
             <button onClick={ checkHealth }>Check health</button>
         </div>
-    )
+    );
 
     async function checkHealth(): Promise<void> {
-        const message = await props.healthChecker()
-            ? healthy
-            : sick;
+        const message = await props.model.checkHealth();
 
         setHealth(message);
     }
