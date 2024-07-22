@@ -1,40 +1,29 @@
 import { TableParser } from "./table-parser";
 import { Transport } from "./transport";
+import { waitForElement } from "./utils";
 
 async function main(): Promise<void> {
+    const lastLoadedSignificantElement = "td";
+    await waitForElement(lastLoadedSignificantElement);
+
     const transport = new Transport();
 
-    await waitForElement("td");
+    const table = document.getElementsByTagName("table")[0];
 
-    const rows = document.getElementsByTagName("table")[0]?.getElementsByTagName("tbody")[0]?.getElementsByTagName("tr");
+    const rows = table.getElementsByTagName("tbody")[0]?.getElementsByTagName("tr");
 
     const tableParser = new TableParser(rows);
-
     const data = tableParser.data();
-
     await transport.checkPvpTable(data);
-}
 
-async function waitForElement(elementName: string): Promise<void> {
-    return new Promise(
-        (resolve) => {
-            if (document.querySelector(elementName) !== null) {
-                return resolve()
-            }
+    const config: MutationObserverInit = { attributes: true, childList: true, characterData: true, subtree: true };
+    const observer = new MutationObserver(async () => {
+        const tableParser = new TableParser(rows);
+        const data = tableParser.data();
+        await transport.checkPvpTable(data);
+    });
 
-            const observer = new MutationObserver(() => {
-                if (document.querySelector(elementName) !== null) {
-                    observer.disconnect();
-                    resolve();
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        }
-    )
+    observer.observe(table, config);
 }
 
 main();
