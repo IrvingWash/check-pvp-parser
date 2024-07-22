@@ -5,7 +5,7 @@ Example:
 CSV_SAVE_PATH=C:\temp\accounts.csv
 ```
 
-Install dependencies bu changing into the `./server` directory and running:
+Install dependencies by changing into the `./server` directory and running:
 ```
 npm i
 ```
