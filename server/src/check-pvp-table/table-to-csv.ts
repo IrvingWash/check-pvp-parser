@@ -1,7 +1,8 @@
 import { createObjectCsvWriter } from "csv-writer";
-import { existsSync, writeFileSync } from "fs";
-import { TableRowDto } from "./table-row.dto";
 import { CsvWriter } from "csv-writer/src/lib/csv-writer";
+import { existsSync, writeFileSync } from "fs";
+
+import { TableRowDto } from "./table-row.dto";
 
 export class TableToCsv {
     private _savePath: string;
