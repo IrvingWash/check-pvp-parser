@@ -16,7 +16,8 @@ export class TableToCsv {
                 { id: 'side', title: 'Side' },
                 { id: 'nameRealm', title: 'Name-Realm' },
                 { id: 'maxArena', title: 'Max Arena' }
-            ]
+            ],
+            append: true,
         });
 
         if (this._savePath === undefined) {
